@@ -12,7 +12,7 @@ public class Parser {
 	 * - NUMBER
 	 * - CELL
 	 */
-	private LinkedList<Token> output;
+	private LinkedList<Token<?>> output;
 	private LinkedList<Integer> arityStack;
 	
 	private Lexer lex;
@@ -23,7 +23,7 @@ public class Parser {
 	 */
 	public Parser(Lexer lex){
 		this.lex = lex;
-		output = new LinkedList<Token>();
+		output = new LinkedList<Token<?>>();
 		arityStack = new LinkedList<Integer>();
 	}
 
@@ -54,10 +54,10 @@ public class Parser {
 		 * - POW ?
 		 * - FACT ?
 		 */
-		LinkedList<Token> operators = new LinkedList<Token>();
+		LinkedList<Token<?>> operators = new LinkedList<Token<?>>();
 		LinkedList<Integer> numargsStack = new LinkedList<Integer>();
 		boolean lastWasNumber = false;
-		Token currentToken;
+		Token<?> currentToken;
 		
 		while(lex.hasNext()){
 			currentToken = lex.next();
@@ -84,8 +84,8 @@ public class Parser {
 				lastWasNumber = false;
 				break;
 			case PLUSMINUS:
-				if(!lastWasNumber && currentToken.data.equals("-")) {
-					operators.push(new Token(UNARYMINUS, "-"));
+				if(!lastWasNumber && ((Character) currentToken.data) == '-') {
+					operators.push(new Token<Object>(UNARYMINUS, null));
 				} else {
 					while(!operators.isEmpty() &&
 							(operators.getFirst().type == PLUSMINUS ||
@@ -199,7 +199,7 @@ public class Parser {
 				}
 				break;
 			case NUMBER:
-				evalStack.push(Double.valueOf(output.removeLast().data));
+				evalStack.push((Double) output.removeLast().data);
 				break;
 			case STRING:
 				evalStack.push(output.removeLast().data);
@@ -251,7 +251,7 @@ public class Parser {
 			case LOGICOP:
 			case LOGICEQ:
 				Object a, b;
-				Token op;
+				Token<?> op;
 				try {
 					b = evalStack.pop();
 					a = evalStack.pop();
@@ -313,7 +313,7 @@ public class Parser {
 					for (int i = numArgs - 1; i >= 0; i--) {
 						args[i] = evalStack.pop();
 					}
-					evalStack.push(evalFunction(output.removeLast().data, args));
+					evalStack.push(evalFunction((String) output.removeLast().data, args));
 				} catch (NoSuchElementException e) {
 					throw new MissingArgException();
 				}

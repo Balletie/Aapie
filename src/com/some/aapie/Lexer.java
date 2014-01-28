@@ -8,7 +8,7 @@ import static com.some.aapie.TokenType.*;
  * @author Team Awesome
  */
 public class Lexer {
-	private LinkedList<Token> tokens;
+	private LinkedList<Token<?>> tokens;
 	private StringBuilder token = new StringBuilder();
 	
 	private enum State {
@@ -38,13 +38,13 @@ public class Lexer {
 	 * @param input	The String containing the expression
 	 */
 	public Lexer(String input) {
-		this.tokens = new LinkedList<Token>();
+		this.tokens = new LinkedList<Token<?>>();
 		
 		if (input == null)
 			return;
 		
 		if (input.length() > 0 && input.charAt(0) != '=') {
-			tokens.add(new Token(STRING, input));
+			tokens.add(new Token<String>(STRING, input));
 			return;
 		}
 			
@@ -56,33 +56,33 @@ public class Lexer {
 	    	case '*':
 	    	case '/':
 	    		setState(State.NONE);
-	    		tokens.add(new Token(MULTDIV, Character.toString(ch)));
+	    		tokens.add(new Token<Character>(MULTDIV, ch));
 	    		break;
 	    	case '<':
 	    	case '>':
 	    		setState(State.NONE);
 	    		if (input.charAt(i + 1) == '=') {
-	    			tokens.add(new Token(LOGICOP, Character.toString(ch) + "="));
+	    			tokens.add(new Token<String>(LOGICOP, Character.toString(ch) + "="));
 	    		} else {
-	    			tokens.add(new Token(LOGICOP, Character.toString(ch)));
+	    			tokens.add(new Token<Character>(LOGICOP, ch));
 	    		}
 	    		break;
 	    	case '+':
 	    	case '-':
 	    		setState(State.NONE);
-	    		tokens.add(new Token(PLUSMINUS, Character.toString(ch)));
+	    		tokens.add(new Token<Character>(PLUSMINUS, ch));
 	    		break;
 	    	case '(':
 	    		setState(State.NONE);
-	    		tokens.add(new Token(LBRACKET, null));
+	    		tokens.add(new Token<Object>(LBRACKET, null));
 	    		break;
 	    	case ')':
 	    		setState(State.NONE);
-	    		tokens.add(new Token(RBRACKET, null));
+	    		tokens.add(new Token<Object>(RBRACKET, null));
 	    		break;
 	    	case ',':
 	    		setState(State.NONE);
-	    		tokens.add(new Token(DELIM, null));
+	    		tokens.add(new Token<Object>(DELIM, null));
 	    		break;
 	    	case ':':
 	    		token.append(ch);
@@ -99,13 +99,13 @@ public class Lexer {
 	    		while (input.charAt(++i) != '"') {
 	    			token.append(input.charAt(i));
 	    		}
-	    		tokens.add(new Token(STRING, token.toString()));
+	    		tokens.add(new Token<String>(STRING, token.toString()));
 	    		token = new StringBuilder();
 	    		break;
 	    	case '=':
 	    		setState(State.NONE);
 	    		if (input.charAt(i + 1) == '=') {
-	    			tokens.add(new Token(LOGICEQ, "=="));
+	    			tokens.add(new Token<String>(LOGICEQ, "=="));
 	    		}
 	    		break;
 	    	default:
@@ -128,7 +128,7 @@ public class Lexer {
 	    	}
 	    }
 	    setState(State.NONE);
-	    tokens.add(new Token(EOL, null));
+	    tokens.add(new Token<Object>(EOL, null));
 	}
 	
 	/**
@@ -143,8 +143,8 @@ public class Lexer {
 	 * Returns the next {@link Token} the {@link Lexer} has in its input.
 	 * @return The next {@link Token}
 	 */
-	public Token next() {
-		return hasNext() ? tokens.pop() : new Token(EOL, null);
+	public Token<?> next() {
+		return hasNext() ? tokens.pop() : new Token<Object>(EOL, null);
 	}
 	
 	/**
@@ -155,16 +155,16 @@ public class Lexer {
 		if (this.state != state &&
 				(state != State.CELL && state != State.CELLRANGE)) {
 			if (this.state == State.NUMBER) {
-				tokens.add(new Token(NUMBER, token.toString()));
+				tokens.add(new Token<Double>(NUMBER, Double.valueOf(token.toString())));
 			} else if (this.state == State.CELL) {
 				String temp = token.toString();
 				if (temp.indexOf(':') == -1) {					
-					tokens.add(new Token(CELL, temp));
+					tokens.add(new Token<String>(CELL, temp));
 				} else {					
-					tokens.add(new Token(CELLRANGE, temp));
+					tokens.add(new Token<String>(CELLRANGE, temp));
 				}
 			} else if (this.state == State.WORD) {
-				tokens.add(new Token(WORD, token.toString()));
+				tokens.add(new Token<String>(WORD, token.toString()));
 			}
 			token = new StringBuilder();
 		}
