@@ -166,7 +166,6 @@ public class Parser {
 					output.removeLast();
 					evalStack.push(-(Double)arg);
 				} else {
-					//TODO: Do something with strings...
 					throw new MissingArgException();
 				}
 				break;
@@ -202,9 +201,11 @@ public class Parser {
 						evalStack.push(new Double((Double)a * (Double)b));
 					} else if ((Character) op.data == '/') {
 						evalStack.push(new Double((Double)a / (Double)b));
+					} else if ((Character) op.data == '%') {
+						evalStack.push(new Double((Double)a % (Double) b));
 					}
 				} else {
-					if (op.data.equals("+")) {
+					if ((Character) op.data == '+') {
 						evalStack.push(a.toString() + b.toString());
 					} else {
 						throw new MissingArgException();

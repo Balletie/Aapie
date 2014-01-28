@@ -44,17 +44,9 @@ public class Lexer {
 	    	switch (ch) {
 	    	case '*':
 	    	case '/':
+	    	case '%':
 	    		setState(State.NONE);
 	    		tokens.add(new Token<Character>(MULTDIV, ch));
-	    		break;
-	    	case '<':
-	    	case '>':
-	    		setState(State.NONE);
-	    		if (input.charAt(i + 1) == '=') {
-	    			tokens.add(new Token<String>(LOGICOP, Character.toString(ch) + "="));
-	    		} else {
-	    			tokens.add(new Token<Character>(LOGICOP, ch));
-	    		}
 	    		break;
 	    	case '+':
 	    	case '-':
