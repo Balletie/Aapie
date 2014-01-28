@@ -72,7 +72,7 @@ public class Parser {
 				break;
 			case MULTDIV:
 				while(!operators.isEmpty() &&
-						(operators.getFirst().type == MULTDIV ||
+					    (operators.getFirst().type == MULTDIV ||
 						operators.getFirst().type == UNARYMINUS))
 				{
 					output.push(operators.pop());
@@ -85,7 +85,7 @@ public class Parser {
 					operators.push(new Token<Object>(UNARYMINUS, null));
 				} else {
 					while(!operators.isEmpty() &&
-							(operators.getFirst().type == PLUSMINUS ||
+						   (operators.getFirst().type == PLUSMINUS ||
 							operators.getFirst().type == MULTDIV ||
 							operators.getFirst().type == UNARYMINUS))
 					{
@@ -97,7 +97,7 @@ public class Parser {
 				break;
 			case LOGICOP:
 				while(!operators.isEmpty() &&
-						(operators.getFirst().type == PLUSMINUS ||
+					   (operators.getFirst().type == PLUSMINUS ||
 						operators.getFirst().type == MULTDIV ||
 						operators.getFirst().type == UNARYMINUS ||
 						operators.getFirst().type == LOGICOP ))
@@ -109,7 +109,7 @@ public class Parser {
 				break;
 			case LOGICEQ:
 				while(!operators.isEmpty() &&
-						(operators.getFirst().type == PLUSMINUS ||
+					   (operators.getFirst().type == PLUSMINUS ||
 						operators.getFirst().type == MULTDIV ||
 						operators.getFirst().type == UNARYMINUS ||
 						operators.getFirst().type == LOGICOP ||
@@ -293,10 +293,10 @@ public class Parser {
 	}
 	
 	/**
-	 * Evaluates a {@link Formula} using the formulas in package <code>com.awesome.excelpp.math</code>.
-	 * @param function The {@link Formula} name
-	 * @param args The {@link Formula} arguments (1..*)
-	 * @return The evaluated {@link Formula}
+	 * Evaluates a function using the static methods in class <code>java.lang.Math</code>.
+	 * @param function The function name
+	 * @param args The function arguments (1..*)
+	 * @return The evaluated function
 	 * @throws FormulaException
 	 */
 	private Object evalFunction(String functionName, Object ... args) throws FormulaException {
