@@ -95,31 +95,6 @@ public class Parser {
 					lastWasNumber = false;
 				}
 				break;
-			case LOGICOP:
-				while(!operators.isEmpty() &&
-					   (operators.getFirst().type == PLUSMINUS ||
-						operators.getFirst().type == MULTDIV ||
-						operators.getFirst().type == UNARYMINUS ||
-						operators.getFirst().type == LOGICOP ))
-				{
-					output.push(operators.pop());
-				}
-				operators.push(currentToken);
-				lastWasNumber = false;
-				break;
-			case LOGICEQ:
-				while(!operators.isEmpty() &&
-					   (operators.getFirst().type == PLUSMINUS ||
-						operators.getFirst().type == MULTDIV ||
-						operators.getFirst().type == UNARYMINUS ||
-						operators.getFirst().type == LOGICOP ||
-						operators.getFirst().type == LOGICEQ ))
-				{
-					output.push(operators.pop());
-				}
-				operators.push(currentToken);
-				lastWasNumber = false;
-				break;
 			case LBRACKET:
 				operators.push(currentToken);
 				lastWasNumber = false;
@@ -170,13 +145,13 @@ public class Parser {
 	 * @throws ParserException
 	 */
 	@SuppressWarnings("incomplete-switch")
-	public Object eval() throws ParserException, RecursionException {
+	public Object eval() throws ParserException {
 		if (output.isEmpty()) {
 			toPostfix();
 		}
 		
 		LinkedList<Object> evalStack = new LinkedList<Object>();
-		
+
 		while(!output.isEmpty()){
 			switch (output.getLast().type) {
 			case UNARYMINUS:
@@ -203,8 +178,6 @@ public class Parser {
 				break;
 			case MULTDIV:
 			case PLUSMINUS:
-			case LOGICOP:
-			case LOGICEQ:
 				Object a, b;
 				Token<?> op;
 				try {
@@ -217,36 +190,20 @@ public class Parser {
 				
 				if (a instanceof String && ((String) a).length() == 0)
 					a = 0.0;
-				if (a instanceof String && ((String) a).length() == 0)
+				if (b instanceof String && ((String) b).length() == 0)
 					b = 0.0;
 				
 				if (a instanceof Double && b instanceof Double) {
-					if (op.data.equals("+")) {
+					if ((Character) op.data == '+') {
 						evalStack.push(new Double((Double)a + (Double)b));
-					} else if (op.data.equals("-")) {
+					} else if ((Character) op.data == '-') {
 						evalStack.push(new Double((Double)a - (Double)b));
-					} else if (op.data.equals("*")) {
+					} else if ((Character) op.data == '*') {
 						evalStack.push(new Double((Double)a * (Double)b));
-					} else if (op.data.equals("/")) {
+					} else if ((Character) op.data == '/') {
 						evalStack.push(new Double((Double)a / (Double)b));
-					} else if (op.data.equals(">")) {
-						evalStack.push((Double)a > (Double)b);
-					} else if (op.data.equals("<")) {
-						evalStack.push((Double)a < (Double)b);
-					} else if (op.data.equals(">=")) {
-						evalStack.push((Double)a >= (Double)b);
-					} else if (op.data.equals("<=")) {
-						evalStack.push((Double)a <= (Double)b);
-					} else if (op.data.equals("==")) {
-						evalStack.push(((Double)a).equals((Double)b));
-					}
-				} else if (a instanceof Boolean && b instanceof Boolean) {
-					if (op.data.equals("==")) {
-						evalStack.push(a == b);
 					}
 				} else {
-					// TODO: Do something with strings...
-					// Moet dit niet gewoon een MathException returnen? Of wil je iets doen met String concat?
 					if (op.data.equals("+")) {
 						evalStack.push(a.toString() + b.toString());
 					} else {
@@ -303,12 +260,22 @@ public class Parser {
 		String className = "java.lang.Math";
 		Object value = null;
 
-		try {
+		Class<?>[] parameters = new Class<?>[args.length];
+		
+		for(int i = 0; i < args.length; i++){
+			if(args[i] instanceof Double){
+				parameters[i] = double.class;
+			} else {
+				parameters[i] = args[i].getClass();
+			}
+		}
+		
+		try{
 			Class<?> mathClass = Class.forName(className);
-			Method mathFunction = mathClass.getMethod(functionName, Double.class);
+			Method mathFunction = mathClass.getMethod(functionName, parameters);
 			value = mathFunction.invoke(null, args);
 		} catch (Exception e) {
-			throw new FormulaException();
+			e.printStackTrace();
 		}
 
 		return value;

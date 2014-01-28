@@ -38,13 +38,7 @@ public class Lexer {
 		if (input == null)
 			return;
 		
-		if (input.length() > 0 && input.charAt(0) != '=') {
-			tokens.add(new Token<String>(STRING, input));
-			return;
-		}
-			
-		
-	    for (int i = 1; i < input.length(); i++) {
+	    for (int i = 0; i < input.length(); i++) {
 	    	char ch = input.charAt(i);
 	    	
 	    	switch (ch) {
@@ -79,9 +73,6 @@ public class Lexer {
 	    		setState(State.NONE);
 	    		tokens.add(new Token<Object>(DELIM, null));
 	    		break;
-	    	case ':':
-	    		token.append(ch);
-	    		break;
 	    	case '.':
 	    		setState(State.NUMBER);
 	    		token.append(ch);
@@ -96,12 +87,6 @@ public class Lexer {
 	    		}
 	    		tokens.add(new Token<String>(STRING, token.toString()));
 	    		token = new StringBuilder();
-	    		break;
-	    	case '=':
-	    		setState(State.NONE);
-	    		if (input.charAt(i + 1) == '=') {
-	    			tokens.add(new Token<String>(LOGICEQ, "=="));
-	    		}
 	    		break;
 	    	default:
 	    		if (Character.isDigit(ch)) {
