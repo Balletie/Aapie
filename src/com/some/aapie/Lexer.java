@@ -21,11 +21,6 @@ public class Lexer {
 		 */
 		NUMBER,
 		/**
-		 * Used when the Lexer's position is inside a CELL {@link Token}.
-		 */
-		CELL,
-		CELLRANGE,
-		/**
 		 * Used when the Lexer's position is inside a WORD {@link Token}.
 		 */
 		WORD
@@ -110,19 +105,10 @@ public class Lexer {
 	    		break;
 	    	default:
 	    		if (Character.isDigit(ch)) {
-	    			if(this.state == State.WORD){
-	    				setState(State.CELL);
-	    				token.append(ch);
-	    			} else if (this.state == State.CELL) {
-	    				token.append(ch);
-	    			} else {
-	    				setState(State.NUMBER);
-	    				token.append(ch);
-	    			}
+    				setState(State.NUMBER);
+    				token.append(ch);
 	    		} else if (Character.isLetter(ch)) {
-	    			if (this.state != State.CELL) {
-		    			setState(State.WORD);
-	    			}
+		    		setState(State.WORD);
 	    			token.append(ch);
 	    		}
 	    	}
@@ -152,17 +138,9 @@ public class Lexer {
 	 * @param state	The {@link State} we want to change to
 	 */
 	private void setState(State state) {
-		if (this.state != state &&
-				(state != State.CELL && state != State.CELLRANGE)) {
+		if (this.state != state) {
 			if (this.state == State.NUMBER) {
 				tokens.add(new Token<Double>(NUMBER, Double.valueOf(token.toString())));
-			} else if (this.state == State.CELL) {
-				String temp = token.toString();
-				if (temp.indexOf(':') == -1) {					
-					tokens.add(new Token<String>(CELL, temp));
-				} else {					
-					tokens.add(new Token<String>(CELLRANGE, temp));
-				}
 			} else if (this.state == State.WORD) {
 				tokens.add(new Token<String>(WORD, token.toString()));
 			}

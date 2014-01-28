@@ -1,6 +1,5 @@
 package com.some.aapie;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -64,8 +63,6 @@ public class Parser {
 			
 			switch (currentToken.type) {
 			case NUMBER:
-			case CELL:
-			case CELLRANGE:
 				output.push(currentToken);
 				lastWasNumber = true;
 				break;
@@ -203,48 +200,6 @@ public class Parser {
 				break;
 			case STRING:
 				evalStack.push(output.removeLast().data);
-				break;
-			case CELLRANGE:
-				String[] range;
-				int arity;
-				try {
-					range = output.removeLast().data.split(":");
-					arity = arityStack.removeLast() - 1;
-				} catch (NoSuchElementException e) {
-					throw new ReferenceException();
-				}
-				
-				int startRow = Integer.parseInt(range[0].substring(1));
-				int startCol = (int) range[0].charAt(0);
-				startCol -= 65;
-				int endRow = Integer.parseInt(range[1].substring(1));
-				int endCol = (int) range[1].charAt(0);
-				endCol -= 65;
-
-				for(int row = startRow; row <= endRow; row++){
-					for(int col = startCol; col <= endCol; col++){
-						arity++;
-						
-						Cell cellref = (Cell) sheet.getValueAt(row - 1, col);
-						Object value = cellref.getValue();
-						if (cell != null)
-							cell.Observe(cellref);
-						evalStack.push(value);
-					}
-				}
-				arityStack.push(arity);
-				break;
-			case CELL:
-				String ref = output.removeLast().data;
-				int row = Integer.parseInt(ref.substring(1));
-				int col = (int) ref.charAt(0);
-				col -= 65;
-
-				Cell cellref = (Cell) sheet.getValueAt(row - 1, col);
-				Object value = cellref.getValue();
-				if (cell != null)
-					cell.Observe(cellref);
-				evalStack.push(value);
 				break;
 			case MULTDIV:
 			case PLUSMINUS:
