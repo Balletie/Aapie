@@ -1,6 +1,8 @@
 package com.some.aapie;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import com.some.aapie.exception.*;
@@ -13,7 +15,7 @@ public class Parser {
 	 */
 	private LinkedList<Token<?>> output;
 	private LinkedList<Integer> arityStack;
-	
+	private static HashSet<String> librarySet = new HashSet<String>();
 	private Lexer lex;
 
 	/**
@@ -24,6 +26,7 @@ public class Parser {
 		this.lex = lex;
 		output = new LinkedList<Token<?>>();
 		arityStack = new LinkedList<Integer>();
+		librarySet.add("java.lang.Math");
 	}
 
 	/**
@@ -32,6 +35,10 @@ public class Parser {
 	 */
 	public Parser(String expr){
 		this(new Lexer(expr));
+	}
+
+	public static void addLibrary(String s){
+		librarySet.add(s);
 	}
 	
 	/**
@@ -44,15 +51,6 @@ public class Parser {
 	 */
 	@SuppressWarnings("incomplete-switch")
 	public void toPostfix() throws ParserException{
-		/*
-		 * The following Tokens are operators:
-		 * 
-		 * - PLUS, MINUS
-		 * - MULT, DIV
-		 * - LBRACKET, RBRACKET
-		 * - POW ?
-		 * - FACT ?
-		 */
 		LinkedList<Token<?>> operators = new LinkedList<Token<?>>();
 		LinkedList<Integer> numargsStack = new LinkedList<Integer>();
 		boolean lastWasNumber = false;
@@ -258,7 +256,6 @@ public class Parser {
 	 * @throws FormulaException
 	 */
 	private Object evalFunction(String functionName, Object ... args) throws FormulaException {
-		String className = "java.lang.Math";
 		Object value = null;
 
 		Class<?>[] parameters = new Class<?>[args.length];
@@ -271,12 +268,29 @@ public class Parser {
 			}
 		}
 		
-		try{
-			Class<?> mathClass = Class.forName(className);
-			Method mathFunction = mathClass.getMethod(functionName, parameters);
-			value = mathFunction.invoke(null, args);
-		} catch (Exception e) {
-			e.printStackTrace();
+		Class<?> mathClass = null;
+		Method mathFunction = null;
+		for(String s : Parser.librarySet){
+			try {
+				mathClass = Class.forName(s);
+				mathFunction = mathClass.getMethod(functionName, parameters);
+			} catch (ClassNotFoundException cnf) {
+				continue;
+			} catch (NoSuchMethodException e) {
+				continue;
+			}
+		}
+
+		if(mathClass != null && mathFunction != null){
+			try {
+				value = mathFunction.invoke(null, args);
+			} catch (IllegalAccessException | IllegalArgumentException e) {
+				System.err.println("Invalid arguments for function " + functionName);
+			} catch (InvocationTargetException e) {
+				System.err.println("Exception thrown by function " + functionName);
+			}
+		} else {
+			System.err.println("No such library or function");
 		}
 
 		return value;

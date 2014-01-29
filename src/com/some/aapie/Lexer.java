@@ -10,7 +10,7 @@ import static com.some.aapie.TokenType.*;
 public class Lexer {
 	private LinkedList<Token<?>> tokens;
 	private StringBuilder token = new StringBuilder();
-	
+
 	private enum State {
 		/**
 		 * Used when the Lexer's position is not inside a {@link Token}.
@@ -38,59 +38,63 @@ public class Lexer {
 		if (input == null)
 			return;
 		
-	    for (int i = 0; i < input.length(); i++) {
-	    	char ch = input.charAt(i);
-	    	
-	    	switch (ch) {
-	    	case '*': case '/': case '%':
-	    		setState(State.NONE);
-	    		tokens.add(new Token<Character>(MULTDIV, ch));
-	    		break;
-	    	case '+': case '-':
-	    		setState(State.NONE);
-	    		tokens.add(new Token<Character>(PLUSMINUS, ch));
-	    		break;
-	    	case '(':
-	    		setState(State.NONE);
-	    		tokens.add(new Token<Object>(LBRACKET, null));
-	    		break;
-	    	case ')':
-	    		setState(State.NONE);
-	    		tokens.add(new Token<Object>(RBRACKET, null));
-	    		break;
-	    	case ',':
-	    		setState(State.NONE);
-	    		tokens.add(new Token<Object>(DELIM, null));
-	    		break;
-	    	case '.':
-	    		setState(State.NUMBER);
-	    		token.append(ch);
-	    		break;
-	    	case ' ': case '\t': case '\n': case '\r': case '\f':
-	    		setState(State.NONE);
-	    		break;
-	    	case '"':
-	    		setState(State.NONE);
-	    		while (input.charAt(++i) != '"') {
-	    			token.append(input.charAt(i));
-	    		}
-	    		tokens.add(new Token<String>(STRING, token.toString()));
-	    		token = new StringBuilder();
-	    		break;
-	    	default:
-	    		if (Character.isDigit(ch)) {
-    				setState(State.NUMBER);
-    				token.append(ch);
-	    		} else if (Character.isLetter(ch)) {
-		    		setState(State.WORD);
-	    			token.append(ch);
-	    		}
-	    	}
-	    }
-	    setState(State.NONE);
-	    tokens.add(new Token<Object>(EOL, null));
+		analyze(input);
 	}
 	
+	private void analyze(String input) {
+		 for (int i = 0; i < input.length(); i++) {
+		    	char ch = input.charAt(i);
+		    	
+		    	switch (ch) {
+			    	case '*': case '/': case '%':
+			    		setState(State.NONE);
+			    		tokens.add(new Token<Character>(MULTDIV, ch));
+			    		break;
+			    	case '+': case '-':
+			    		setState(State.NONE);
+			    		tokens.add(new Token<Character>(PLUSMINUS, ch));
+			    		break;
+			    	case '(':
+			    		setState(State.NONE);
+			    		tokens.add(new Token<Object>(LBRACKET, null));
+			    		break;
+			    	case ')':
+			    		setState(State.NONE);
+			    		tokens.add(new Token<Object>(RBRACKET, null));
+			    		break;
+			    	case ',':
+			    		setState(State.NONE);
+			    		tokens.add(new Token<Object>(DELIM, null));
+			    		break;
+			    	case '.':
+			    		setState(State.NUMBER);
+			    		token.append(ch);
+			    		break;
+			    	case ' ': case '\t': case '\n': case '\r': case '\f':
+			    		setState(State.NONE);
+			    		break;
+			    	case '"':
+			    		setState(State.NONE);
+			    		while (input.charAt(++i) != '"') {
+			    			token.append(input.charAt(i));
+			    		}
+			    		tokens.add(new Token<String>(STRING, token.toString()));
+			    		token = new StringBuilder();
+			    		break;
+			    	default:
+			    		if (Character.isDigit(ch)) {
+		    				setState(State.NUMBER);
+		    				token.append(ch);
+			    		} else if (Character.isLetter(ch)) {
+				    		setState(State.WORD);
+			    			token.append(ch);
+			    		}
+		    	}
+		    }
+		    setState(State.NONE);
+		    tokens.add(new Token<Object>(EOL, null));
+	}
+
 	/**
 	 * Checks whether the {@link Lexer} has another {@link Token} in its input. 
 	 * @return True is the {@link Lexer} has another {@link Token} in its input
