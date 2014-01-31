@@ -237,9 +237,7 @@ public class Parser {
 		Object retvalue = "";
 		try {
 			retvalue = evalStack.pop();
-		} catch (NoSuchElementException e) {
-			
-		}
+		} catch (NoSuchElementException e) {}
 		
 		if (retvalue instanceof Double) {
 			retvalue = (Double)retvalue;
@@ -263,7 +261,9 @@ public class Parser {
 		for(int i = 0; i < args.length; i++){
 			if(args[i] instanceof Double){
 				parameters[i] = double.class;
-			} else {
+			}else if(args[i] instanceof Integer){
+				parameters[i] = int.class;
+			}else{
 				parameters[i] = args[i].getClass();
 			}
 		}
@@ -290,7 +290,7 @@ public class Parser {
 				System.err.println("Exception thrown by function " + functionName);
 			}
 		} else {
-			System.err.println("No such library or function");
+			throw new FormulaException();
 		}
 
 		return value;
