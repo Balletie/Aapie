@@ -68,24 +68,29 @@ public class Parser {
 				output.push(currentToken);
 				lastWasNumber = false;
 				break;
-			case MULTDIV:
+			case MULT: case DIV: case MOD:
 				while(!operators.isEmpty() &&
-					    (operators.getFirst().type == MULTDIV ||
-						operators.getFirst().type == UNARYMINUS))
+					  (operators.getFirst().type == MULT ||
+					   operators.getFirst().type == DIV ||
+					   operators.getFirst().type == MOD ||
+					   operators.getFirst().type == UNARYMINUS))
 				{
 					output.push(operators.pop());
 				}
 				operators.push(currentToken);
 				lastWasNumber = false;
 				break;
-			case PLUSMINUS:
+			case PLUS: case MINUS:
 				if(!lastWasNumber && ((Character) currentToken.data) == '-') {
 					operators.push(new Token<Object>(UNARYMINUS, null));
 				} else {
 					while(!operators.isEmpty() &&
-						   (operators.getFirst().type == PLUSMINUS ||
-							operators.getFirst().type == MULTDIV ||
-							operators.getFirst().type == UNARYMINUS))
+						  (operators.getFirst().type == PLUS ||
+						   operators.getFirst().type == MINUS ||
+						   operators.getFirst().type == MULT ||
+						   operators.getFirst().type == DIV ||
+						   operators.getFirst().type == MOD ||
+						   operators.getFirst().type == UNARYMINUS))
 					{
 						output.push(operators.pop());
 					}
@@ -173,8 +178,8 @@ public class Parser {
 			case STRING:
 				evalStack.push(output.removeLast().data);
 				break;
-			case MULTDIV:
-			case PLUSMINUS:
+			case MULT: case DIV: case MOD:
+			case PLUS: case MINUS:
 				Object a, b;
 				Token<?> op;
 				try {
@@ -191,19 +196,19 @@ public class Parser {
 					b = 0.0;
 				
 				if (a instanceof Double && b instanceof Double) {
-					if ((Character) op.data == '+') {
+					if (op.type == PLUS) {
 						evalStack.push(new Double((Double)a + (Double)b));
-					} else if ((Character) op.data == '-') {
+					} else if (op.type == MINUS) {
 						evalStack.push(new Double((Double)a - (Double)b));
-					} else if ((Character) op.data == '*') {
+					} else if (op.type == MULT) {
 						evalStack.push(new Double((Double)a * (Double)b));
-					} else if ((Character) op.data == '/') {
+					} else if (op.type == DIV) {
 						evalStack.push(new Double((Double)a / (Double)b));
-					} else if ((Character) op.data == '%') {
+					} else if (op.type == MOD) {
 						evalStack.push(new Double((Double)a % (Double) b));
 					}
 				} else {
-					if ((Character) op.data == '+') {
+					if (op.type == PLUS) {
 						evalStack.push(a.toString() + b.toString());
 					} else {
 						throw new MissingArgException();

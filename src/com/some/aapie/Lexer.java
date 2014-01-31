@@ -46,13 +46,25 @@ public class Lexer {
 		    	char ch = input.charAt(i);
 		    	
 		    	switch (ch) {
-			    	case '*': case '/': case '%':
+			    	case '*':
 			    		setState(State.NONE);
-			    		tokens.add(new Token<Character>(MULTDIV, ch));
+			    		tokens.add(new Token<Object>(MULT, null));
 			    		break;
-			    	case '+': case '-':
+			    	case '/':
 			    		setState(State.NONE);
-			    		tokens.add(new Token<Character>(PLUSMINUS, ch));
+			    		tokens.add(new Token<Object>(DIV, null));
+			    		break;
+			    	case '%':
+			    		setState(State.NONE);
+			    		tokens.add(new Token<Object>(MOD, null));
+			    		break;
+			    	case '+': 
+			    		setState(State.NONE);
+			    		tokens.add(new Token<Object>(PLUS, null));
+			    		break;
+			    	case '-':
+			    		setState(State.NONE);
+			    		tokens.add(new Token<Object>(MINUS, null));
 			    		break;
 			    	case '(':
 			    		setState(State.NONE);

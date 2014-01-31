@@ -29,11 +29,11 @@ public enum TokenType {
 	/**
 	 * Token representing a PLUSMINUS: <code>+-</code>.
 	 */
-	PLUSMINUS,
+	PLUS, MINUS,
 	/**
 	 * Token representing a MULTDIV: <code>{@literal *}/</code>.
 	 */
-	MULTDIV,
+	MULT, DIV, MOD,
 	/**
 	 * Token representing an LBRACKET: <code>(</code>.
 	 */
