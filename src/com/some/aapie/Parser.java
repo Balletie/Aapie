@@ -13,18 +13,18 @@ public class Parser {
 	 * - NUMBER
 	 * - CELL
 	 */
-	private LinkedList<Token<?>> output;
+	private LinkedList<Token<?>> postfix;
 	private LinkedList<Integer> arityStack;
 	private static HashSet<String> librarySet = new HashSet<String>();
-	private Lexer lex;
+	private Lexer infix;
 
 	/**
 	 * Creates a new expression Parser.
-	 * @param lex The {@link Lexer} containing the expression 
+	 * @param infix The {@link Lexer} containing the expression 
 	 */
-	public Parser(Lexer lex){
-		this.lex = lex;
-		output = new LinkedList<Token<?>>();
+	public Parser(Lexer infix){
+		this.infix = infix;
+		postfix = new LinkedList<Token<?>>();
 		arityStack = new LinkedList<Integer>();
 		librarySet.add("java.lang.Math");
 	}
@@ -56,16 +56,16 @@ public class Parser {
 		boolean lastWasNumber = false;
 		Token<?> currentToken;
 		
-		while(lex.hasNext()){
-			currentToken = lex.next();
+		while(infix.hasNext()){
+			currentToken = infix.next();
 			
 			switch (currentToken.type) {
 			case NUMBER:
-				output.push(currentToken);
+				postfix.push(currentToken);
 				lastWasNumber = true;
 				break;
 			case STRING:
-				output.push(currentToken);
+				postfix.push(currentToken);
 				lastWasNumber = false;
 				break;
 			case MULT: case DIV: case MOD:
@@ -75,13 +75,13 @@ public class Parser {
 					   operators.getFirst().type == MOD ||
 					   operators.getFirst().type == UNARYMINUS))
 				{
-					output.push(operators.pop());
+					postfix.push(operators.pop());
 				}
 				operators.push(currentToken);
 				lastWasNumber = false;
 				break;
 			case PLUS: case MINUS:
-				if(!lastWasNumber && ((Character) currentToken.data) == '-') {
+				if(!lastWasNumber && currentToken.type == MINUS) {
 					operators.push(new Token<Object>(UNARYMINUS, null));
 				} else {
 					while(!operators.isEmpty() &&
@@ -92,7 +92,7 @@ public class Parser {
 						   operators.getFirst().type == MOD ||
 						   operators.getFirst().type == UNARYMINUS))
 					{
-						output.push(operators.pop());
+						postfix.push(operators.pop());
 					}
 					operators.push(currentToken);
 					lastWasNumber = false;
@@ -105,11 +105,11 @@ public class Parser {
 			case RBRACKET:
 				try {
 					while(!(operators.getFirst().type == LBRACKET)){
-						output.push(operators.pop());
+						postfix.push(operators.pop());
 					}
 					operators.pop();
 					if (!operators.isEmpty() && operators.getFirst().type == WORD){
-						output.push(operators.pop());
+						postfix.push(operators.pop());
 						arityStack.push(numargsStack.pop());
 					}
 				} catch (NoSuchElementException e) {
@@ -121,7 +121,7 @@ public class Parser {
 					Integer numargs = numargsStack.pop() + 1;
 					numargsStack.push(numargs);
 					while(!(operators.getFirst().type == LBRACKET)){
-						output.push(operators.pop());
+						postfix.push(operators.pop());
 					}
 				} catch (NoSuchElementException e) {
 					throw new MissingLBracketException();
@@ -135,7 +135,7 @@ public class Parser {
 				break;
 			case EOL:
 				while(!operators.isEmpty()){
-					output.push(operators.pop());
+					postfix.push(operators.pop());
 				}
 				break;
 			}
@@ -149,14 +149,14 @@ public class Parser {
 	 */
 	@SuppressWarnings("incomplete-switch")
 	public Object eval() throws ParserException {
-		if (output.isEmpty()) {
+		if (postfix.isEmpty()) {
 			toPostfix();
 		}
 		
 		LinkedList<Object> evalStack = new LinkedList<Object>();
 
-		while(!output.isEmpty()){
-			switch (output.getLast().type) {
+		while(!postfix.isEmpty()){
+			switch (postfix.getLast().type) {
 			case UNARYMINUS:
 				Object arg;
 				try {
@@ -166,26 +166,25 @@ public class Parser {
 				}
 				
 				if (arg instanceof Double) {
-					output.removeLast();
+					postfix.removeLast();
 					evalStack.push(-(Double)arg);
 				} else {
 					throw new MissingArgException();
 				}
 				break;
 			case NUMBER:
-				evalStack.push((Double) output.removeLast().data);
+				evalStack.push((Double) postfix.removeLast().data);
 				break;
 			case STRING:
-				evalStack.push(output.removeLast().data);
+				evalStack.push(postfix.removeLast().data);
 				break;
-			case MULT: case DIV: case MOD:
-			case PLUS: case MINUS:
+			case MULT: case DIV: case MOD: case PLUS: case MINUS:
 				Object a, b;
 				Token<?> op;
 				try {
 					b = evalStack.pop();
 					a = evalStack.pop();
-					op = output.removeLast();
+					op = postfix.removeLast();
 				} catch (NoSuchElementException e) {
 					throw new MissingArgException();
 				}
@@ -205,7 +204,7 @@ public class Parser {
 					} else if (op.type == DIV) {
 						evalStack.push(new Double((Double)a / (Double)b));
 					} else if (op.type == MOD) {
-						evalStack.push(new Double((Double)a % (Double) b));
+						evalStack.push(new Double((Double)a % (Double)b));
 					}
 				} else {
 					if (op.type == PLUS) {
@@ -229,7 +228,7 @@ public class Parser {
 					for (int i = numArgs - 1; i >= 0; i--) {
 						args[i] = evalStack.pop();
 					}
-					evalStack.push(evalFunction((String) output.removeLast().data, args));
+					evalStack.push(evalFunction((String) postfix.removeLast().data, args));
 				} catch (NoSuchElementException e) {
 					throw new MissingArgException();
 				}
