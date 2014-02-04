@@ -15,10 +15,11 @@ public class Parser {
 	 */
 	private LinkedList<Token<?>> postfix;
 	private LinkedList<Integer> arityStack;
-	private static HashSet<String> librarySet = new HashSet<String>();
+	private static HashSet<String> librarySet;
 	private Lexer infix;
 
 	static{
+		librarySet = new HashSet<String>();
 		librarySet.add("java.lang.Math");
 	}
 	
