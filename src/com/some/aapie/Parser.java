@@ -18,6 +18,10 @@ public class Parser {
 	private static HashSet<String> librarySet = new HashSet<String>();
 	private Lexer infix;
 
+	static{
+		librarySet.add("java.lang.Math");
+	}
+	
 	/**
 	 * Creates a new expression Parser.
 	 * @param infix The {@link Lexer} containing the expression 
@@ -26,7 +30,6 @@ public class Parser {
 		this.infix = infix;
 		postfix = new LinkedList<Token<?>>();
 		arityStack = new LinkedList<Integer>();
-		librarySet.add("java.lang.Math");
 	}
 
 	/**
@@ -238,16 +241,7 @@ public class Parser {
 			}
 		}
 		
-		Object retvalue = "";
-		try {
-			retvalue = evalStack.pop();
-		} catch (NoSuchElementException e) {}
-		
-		if (retvalue instanceof Double) {
-			retvalue = (Double)retvalue;
-		}
-		
-		return retvalue;
+		return evalStack.pop();
 	}
 	
 	/**
