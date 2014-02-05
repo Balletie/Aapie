@@ -5,7 +5,8 @@ import static com.some.aapie.TokenType.*;
 
 /**
  * This class splits an incoming String into Tokens for analysis by the {@link Parser}.
- * @author Team Awesome
+ * @author Skip Lentz
+ * @author Gerlof Fokkema
  */
 public class Lexer {
 	private LinkedList<Token<?>> tokens;

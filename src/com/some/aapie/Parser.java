@@ -8,19 +8,20 @@ import java.util.NoSuchElementException;
 import com.some.aapie.exception.*;
 import static com.some.aapie.TokenType.*;
 
+/**
+ * This class parses a series of tokens, represented in infix-notation.
+ * @author Skip Lentz
+ * @author Gerlof Fokkema
+ */
 public class Parser {
-	/* The following Tokens are operands:
-	 * - NUMBER
-	 * - CELL
-	 */
 	private LinkedList<Token<?>> postfix;
 	private LinkedList<Integer> arityStack;
-	private static HashSet<String> librarySet;
+	private static HashSet<String> classSet;
 	private Lexer infix;
 
 	static{
-		librarySet = new HashSet<String>();
-		librarySet.add("java.lang.Math");
+		classSet = new HashSet<String>();
+		classSet.add("java.lang.Math");
 	}
 	
 	/**
@@ -41,10 +42,47 @@ public class Parser {
 		this(new Lexer(expr));
 	}
 
-	public static void addLibrary(String s){
-		librarySet.add(s);
+	/**
+	 * Add a class to the other classes.
+	 * <p>
+	 * Note: the class must be in the build path. Thus, all java classes can be used.
+	 * After adding the class, all the static methods in the class can be used in any expression.
+	 * </p>
+	 * @param s The class' canonical name
+	 * @return <code>true</code> if this class has not been added yet.
+	 */
+	public static boolean addClass(String s){
+		return classSet.add(s);
 	}
 
+	/**
+	 * Remove a class from the other classes.
+	 * @param s The class' canonical name
+	 * @return <code>true</code> if this class has been added, and has thus been removed.
+	 */
+	public boolean removeClass(String s){
+		return classSet.remove(s);
+	}
+
+	/**
+	 * Returns the converted expression in postfix-notation.
+	 * <p>
+	 * This can be used to create an Abstract Syntax Tree of the expression, among other uses.
+	 * </p>
+	 * <p>
+	 * Note: {@link toPostfix()} should be called beforehand.
+	 * </p>
+	 * @return the expression in postfix-notation.
+	 */
+
+	public LinkedList<Token<?>> getPostfix(){
+		return this.postfix;
+	}
+	/**
+	 * Returns the operator precedence of the token, returns 0 if the token is not an operator.
+	 * @param t The {@link Token}
+	 * @return The operator precedence of this token.
+	 */
 	private static byte opPrecedence(Token<?> t){
 		switch(t.type){
 		case PLUS: case MINUS:
@@ -59,11 +97,11 @@ public class Parser {
 	}
 
 	/**
-	 * Converts the expression in infix-notation to postfix-notation using the Shunting-yard Algorithm:<br>
-	 * <br>
-	 * infix               | postfix<br>
-	 * ------------------- | -----------------<br>
-	 * 3 + 7 / (4 * 5 - 6) | 3 7 4 5 * 6 - / +<br>
+	 * Converts the expression in infix-notation to postfix-notation using the Shunting-yard Algorithm.
+	 * <p>
+	 * A series of tokens like <code>3 + 7 / (4 * 5 - 6)</code> will be converted to 
+	 * <code>3 7 4 5 * 6 - / +</code> after calling this method.
+	 * </p>
 	 * @throws ParserException 
 	 */
 	@SuppressWarnings("incomplete-switch")
@@ -263,7 +301,7 @@ public class Parser {
 		
 		Class<?> mathClass = null;
 		Method mathFunction = null;
-		for(String s : Parser.librarySet){
+		for(String s : Parser.classSet){
 			try {
 				mathClass = Class.forName(s);
 				mathFunction = mathClass.getMethod(functionName, parameters);

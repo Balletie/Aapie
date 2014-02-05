@@ -5,6 +5,11 @@ import java.util.Scanner;
 import org.apache.commons.cli.*;
 import com.some.aapie.exception.*;
 
+/**Example CommandLine program using the Parser API
+ * 
+ * @author Skip Lentz
+ * @since 2014-02-05
+ */
 public class Main {
 	@SuppressWarnings("static-access")
 	public static void main(String[] args) {
@@ -31,7 +36,7 @@ public class Main {
 			if(line.hasOption('l')){
 				String[] libraries = line.getOptionValues('l');
 				for(String s : libraries){					
-					Parser.addLibrary(s);
+					Parser.addClass(s);
 				}
 			}
 			if(line.hasOption('i')){
