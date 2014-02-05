@@ -78,23 +78,6 @@ public class Parser {
 	public LinkedList<Token<?>> getPostfix(){
 		return this.postfix;
 	}
-	/**
-	 * Returns the operator precedence of the token, returns 0 if the token is not an operator.
-	 * @param t The {@link Token}
-	 * @return The operator precedence of this token.
-	 */
-	private static byte opPrecedence(Token<?> t){
-		switch(t.type){
-		case PLUS: case MINUS:
-			return 1;
-		case MULT: case DIV: case MOD:
-			return 2;
-		case UNARYMINUS:
-			return 3;
-		default:
-			return 0;
-		}
-	}
 
 	/**
 	 * Converts the expression in infix-notation to postfix-notation using the Shunting-yard Algorithm.
@@ -125,9 +108,9 @@ public class Parser {
 				break;
 			case MULT: case DIV: case MOD: case PLUS: case MINUS:
 				if(!lastWasNumber && currentToken.type == MINUS) {
-					operators.push(new Token<Object>(UNARYMINUS, null));
+					operators.push(new Token<Integer>(UNARYMINUS, 3));
 				} else {
-					while(!operators.isEmpty() && (opPrecedence(currentToken) <= opPrecedence(operators.getFirst()))){
+					while(!operators.isEmpty() && ((Integer) currentToken.data <= (Integer) operators.getFirst().data)){
 						postfix.push(operators.pop());
 					}
 					operators.push(currentToken);

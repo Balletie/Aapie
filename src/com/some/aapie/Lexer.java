@@ -49,27 +49,27 @@ public class Lexer {
 		    	switch (ch) {
 			    	case '*':
 			    		setState(State.NONE);
-			    		tokens.add(new Token<Object>(MULT, null));
+			    		tokens.add(new Token<Integer>(MULT, 2));
 			    		break;
 			    	case '/':
 			    		setState(State.NONE);
-			    		tokens.add(new Token<Object>(DIV, null));
+			    		tokens.add(new Token<Integer>(DIV, 2));
 			    		break;
 			    	case '%':
 			    		setState(State.NONE);
-			    		tokens.add(new Token<Object>(MOD, null));
+			    		tokens.add(new Token<Integer>(MOD, 2));
 			    		break;
-			    	case '+': 
+			    	case '+':
 			    		setState(State.NONE);
-			    		tokens.add(new Token<Object>(PLUS, null));
+			    		tokens.add(new Token<Integer>(PLUS, 1));
 			    		break;
 			    	case '-':
 			    		setState(State.NONE);
-			    		tokens.add(new Token<Object>(MINUS, null));
+			    		tokens.add(new Token<Integer>(MINUS, 1));
 			    		break;
 			    	case '(':
 			    		setState(State.NONE);
-			    		tokens.add(new Token<Object>(LBRACKET, null));
+			    		tokens.add(new Token<Object>(LBRACKET, 0));
 			    		break;
 			    	case ')':
 			    		setState(State.NONE);
