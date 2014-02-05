@@ -44,7 +44,20 @@ public class Parser {
 	public static void addLibrary(String s){
 		librarySet.add(s);
 	}
-	
+
+	private static byte opPrecedence(Token<?> t){
+		switch(t.type){
+		case PLUS: case MINUS:
+			return 1;
+		case MULT: case DIV: case MOD:
+			return 2;
+		case UNARYMINUS:
+			return 3;
+		default:
+			return 0;
+		}
+	}
+
 	/**
 	 * Converts the expression in infix-notation to postfix-notation using the Shunting-yard Algorithm:<br>
 	 * <br>
@@ -72,30 +85,11 @@ public class Parser {
 				postfix.push(currentToken);
 				lastWasNumber = false;
 				break;
-			case MULT: case DIV: case MOD:
-				while(!operators.isEmpty() &&
-					  (operators.getFirst().type == MULT ||
-					   operators.getFirst().type == DIV ||
-					   operators.getFirst().type == MOD ||
-					   operators.getFirst().type == UNARYMINUS))
-				{
-					postfix.push(operators.pop());
-				}
-				operators.push(currentToken);
-				lastWasNumber = false;
-				break;
-			case PLUS: case MINUS:
+			case MULT: case DIV: case MOD: case PLUS: case MINUS:
 				if(!lastWasNumber && currentToken.type == MINUS) {
 					operators.push(new Token<Object>(UNARYMINUS, null));
 				} else {
-					while(!operators.isEmpty() &&
-						  (operators.getFirst().type == PLUS ||
-						   operators.getFirst().type == MINUS ||
-						   operators.getFirst().type == MULT ||
-						   operators.getFirst().type == DIV ||
-						   operators.getFirst().type == MOD ||
-						   operators.getFirst().type == UNARYMINUS))
-					{
+					while(!operators.isEmpty() && (opPrecedence(currentToken) <= opPrecedence(operators.getFirst()))){
 						postfix.push(operators.pop());
 					}
 					operators.push(currentToken);
@@ -145,7 +139,7 @@ public class Parser {
 			}
 		}
 	}
-	
+
 	/**
 	 * Evaluates the stored mathematical expression represented in postfix-notation.
 	 * @return The evaluated expression
@@ -156,7 +150,7 @@ public class Parser {
 		if (postfix.isEmpty()) {
 			toPostfix();
 		}
-		
+
 		LinkedList<Object> evalStack = new LinkedList<Object>();
 
 		while(!postfix.isEmpty()){
